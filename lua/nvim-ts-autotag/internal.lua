@@ -4,6 +4,8 @@ local parsers = require'nvim-treesitter.parsers'
 local log = require('nvim-ts-autotag._log')
 -- local utils=require('nvim-ts-autotag.utils')
 
+local is_jsx_fragment = require('nvim-ts-autotag.jsx_fragments').is_jsx_fragment
+
 local M = {}
 
 M.tbl_filetypes = {
@@ -259,6 +261,9 @@ local function check_close_tag()
         end
         return true, tag_name
     end
+
+    if is_jsx_fragment() then return true, '' end
+
     return false
 end
 
