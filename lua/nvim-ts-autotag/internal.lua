@@ -81,6 +81,7 @@ local all_tag = {
 }
 M.enable_rename = true
 M.enable_close  = true
+M.skip_close_shortcut = ''
 
 M.setup = function (opts)
     opts            = opts or {}
@@ -88,6 +89,7 @@ M.setup = function (opts)
     M.tbl_skipTag   = opts.skip_tag or M.tbl_skipTag
     M.enable_rename = opts.enable_rename or M.enable_rename
     M.enable_close  = opts.enable_close or M.enable_close
+    M.skip_close_shortcut = opts.skip_close_shortcut or M.skip_close_shortcut
 end
 
 local function is_in_table(tbl, val)
@@ -416,6 +418,9 @@ M.attach = function (bufnr,lang)
     if is_in_table(M.tbl_filetypes, vim.bo.filetype) then
         if M.enable_close == true then
             vim.cmd[[inoremap <silent> <buffer> > ><c-c>:lua require('nvim-ts-autotag.internal').close_tag()<CR>a]]
+        end
+        if M.skip_close_shortcut ~= '' then
+          vim.cmd('inoremap <silent> <buffer> ' .. M.skip_close_shortcut .. ' >')
         end
         if M.enable_rename == true then
             bufnr = bufnr or vim.api.nvim_get_current_buf()
