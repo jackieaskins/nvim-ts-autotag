@@ -107,13 +107,8 @@ end
 
 local buffer_tag={}
 
-local function get_ts_tag()
+local setup_ts_tag = function()
     local bufnr = vim.api.nvim_get_current_buf()
-
-    if buffer_tag[bufnr] then
-        return buffer_tag[bufnr]
-    end
-
     for _,value in pairs(all_tag) do
         if is_in_table(value.filetypes,vim.bo.filetype) then
             buffer_tag[bufnr] = value
@@ -121,11 +116,12 @@ local function get_ts_tag()
         end
     end
     buffer_tag[bufnr] = HTML_TAG
-    return HTML_TAG
 end
 
-M.on_file_type = function ()
+local function get_ts_tag()
+    return buffer_tag[vim.api.nvim_get_current_buf()]
 end
+
 local function find_child_match(opts)
     local target           = opts.target
     local pattern          = opts.pattern
@@ -232,6 +228,7 @@ end
 
 local function check_close_tag()
     local ts_tag = get_ts_tag()
+    if not ts_tag then return false end
     local tag_node     = find_tag_node({
         tag_pattern      = ts_tag.start_tag_pattern,
         name_tag_pattern = ts_tag.start_name_tag_pattern,
@@ -271,7 +268,9 @@ local function check_close_tag()
 end
 
 M.close_tag = function ()
-    parsers.get_parser():parse()
+    local buf_parser = parsers.get_parser()
+    if not buf_parser then return end
+    buf_parser:parse()
     local result, tag_name = check_close_tag()
     if result == true and tag_name ~= nil then
         vim.cmd(string.format([[normal! a</%s>]],tag_name))
@@ -314,6 +313,7 @@ end
 
 local function rename_start_tag()
     local ts_tag = get_ts_tag()
+    if not ts_tag then return end
     local tag_node     = find_tag_node({
         tag_pattern      = ts_tag.start_tag_pattern,
         name_tag_pattern = ts_tag.start_name_tag_pattern,
@@ -365,6 +365,7 @@ end
 
 local function rename_end_tag()
     local ts_tag = get_ts_tag()
+    if not ts_tag then return end
     local tag_node = find_tag_node({
         tag_pattern = ts_tag.close_tag_pattern,
         name_tag_pattern = ts_tag.close_name_tag_pattern,
@@ -417,6 +418,7 @@ M.attach = function (bufnr,lang)
     local config = configs.get_module('autotag')
     M.setup(config)
     if is_in_table(M.tbl_filetypes, vim.bo.filetype) then
+        setup_ts_tag()
         if M.enable_close == true then
             vim.cmd[[inoremap <silent> <buffer> > ><c-c>:lua require('nvim-ts-autotag.internal').close_tag()<CR>a]]
         end
@@ -425,10 +427,10 @@ M.attach = function (bufnr,lang)
         end
         if M.enable_rename == true then
             bufnr = bufnr or vim.api.nvim_get_current_buf()
-            vim.cmd("augroup nvim_ts_xmltag_" .. bufnr)
-            vim.cmd[[autocmd!]]
-            vim.cmd[[autocmd InsertLeave <buffer> call v:lua.require('nvim-ts-autotag.internal').rename_tag() ]]
-            vim.cmd[[augroup end]]
+            vim.cmd(string.format(
+                [[autocmd! InsertLeave <buffer=%s> call v:lua.require('nvim-ts-autotag.internal').rename_tag() ]],
+                bufnr
+            ))
         end
     end
 end
