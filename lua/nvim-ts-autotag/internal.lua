@@ -13,7 +13,8 @@ M.tbl_filetypes = {
     'xml',
     'php',
     'markdown',
-    'glimmer','handlebars','hbs'
+    'glimmer','handlebars','hbs',
+    'htmldjango'
 }
 
 M.tbl_skipTag = {
@@ -24,7 +25,7 @@ M.tbl_skipTag = {
 local ERROR_TAG = "ERROR"
 
 local HTML_TAG = {
-    filetypes              = {'html', 'php', 'xml', 'markdown'},
+    filetypes              = {'html', 'php', 'xml', 'markdown', 'htmldjango'},
     start_tag_pattern      = 'start_tag',
     start_name_tag_pattern = 'tag_name',
     end_tag_pattern        = "end_tag",
@@ -43,7 +44,7 @@ local JSX_TAG = {
     start_tag_pattern       = 'jsx_opening_element',
     start_name_tag_pattern  = 'identifier|nested_identifier|jsx_identifier',
     end_tag_pattern         = "jsx_closing_element",
-    end_name_tag_pattern    = "identifier|jsx_identifier",
+    end_name_tag_pattern    = "identifier|nested_identifier|jsx_identifier",
     close_tag_pattern       = 'jsx_closing_element',
     close_name_tag_pattern  = 'identifier|nested_identifier|jsx_identifier',
     element_tag             = 'jsx_element',
