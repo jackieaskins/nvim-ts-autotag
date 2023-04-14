@@ -4,7 +4,7 @@ local get_node_text = vim.treesitter.get_node_text or vim.treesitter.query.get_n
 local M = {}
 
 M.get_node_text = function(node)
-    local txt = get_node_text(node, vim.api.nvim_get_current_buf())
+    local _, txt = pcall(get_node_text, node, vim.api.nvim_get_current_buf())
     return vim.split(txt, '\n') or {}
 end
 
